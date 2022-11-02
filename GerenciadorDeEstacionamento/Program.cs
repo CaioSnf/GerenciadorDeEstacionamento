@@ -1,8 +1,18 @@
-﻿string escolhaMenu = "";
-List<string> placas = new List<string>();
-List<string> pessoas = new List<string>();
+﻿using GerenciadorDeEstacionamento.Classes;
+
+string escolhaMenu = "";
+
 string fecharPrograma = "";
-int vagasDisponiveis = 60;
+string placaEntradaPatio = "";
+
+Patio patio = new Patio();
+patio.ValorHora = 4.50M;
+patio.QuantidadeVagasDisponiveis = 60;
+patio.CarrosEstacionados = new List<Estacionado>();
+
+List<Carro> carros = new List<Carro>();
+Carro carroFiltrado = new Carro();
+
 while (escolhaMenu != "0") 
 {
     Console.WriteLine("Bem vindo ao estacionamento Ki Vaga");
@@ -13,26 +23,30 @@ while (escolhaMenu != "0")
     Console.WriteLine("5- Total faturado no dia especificado");
     Console.WriteLine("6- Tabela de preços");
     Console.WriteLine("7- Carros cadastrados");
-    Console.WriteLine("8- Pessoas cadastradas");
+    Console.WriteLine("8- Carros estacionados");
     Console.WriteLine("0- Fechar programa");
-
+    
 
     escolhaMenu = Console.ReadLine();
 
     switch (escolhaMenu)
     {
         case "1":
+            Carro carro = new Carro();
+
             Console.Clear();
 
             Console.WriteLine("Tela de cadastro de veículo");
 
             Console.WriteLine("Placa do carro");
 
-            placas.Add(Console.ReadLine());
+            carro.Placa = Console.ReadLine();
+
 
             Console.WriteLine("Proprietario");
-
-            pessoas.Add(Console.ReadLine());
+            
+            carro.NomeProp = Console.ReadLine();
+            carros.Add(carro);
             Console.Clear();
 
             break;
@@ -40,16 +54,33 @@ while (escolhaMenu != "0")
         case "2":
             Console.Clear();
 
-            if (placas.Count != 0)
+            if (carros.Count != 0)
             {
                 Console.WriteLine("Escolha qual placa que entrou no patio");
-                foreach (string placa in placas)
+                foreach (Carro car in carros)
                 {
-
-                    Console.WriteLine(placa);
+                    Console.WriteLine(car.Placa);
+                }
+               
+                placaEntradaPatio = Console.ReadLine();
+                carroFiltrado = carros.FirstOrDefault(carro => carro.Placa == placaEntradaPatio);
+                if (carroFiltrado != null) {
+                    Estacionado carroEstacionado = new Estacionado();
+                    carroEstacionado.Carro = carroFiltrado;
+                    carroEstacionado.HorarioEntrada = DateTime.Now;
+                    patio.CarrosEstacionados.Add(carroEstacionado);
+                    Console.WriteLine($"O carro com placa {placaEntradaPatio} foi estacionado");
 
                 }
-                
+                else
+                {
+                    Console.WriteLine("O carro inserido nao existe");
+
+                }
+
+
+
+
             }
             else {
                 Console.WriteLine("Não existe nenhuma placa cadastrada");
@@ -68,7 +99,7 @@ while (escolhaMenu != "0")
         case "4":
             Console.Clear();
             
-            Console.WriteLine($"Temos {vagasDisponiveis} vagas disponíveis");
+            Console.WriteLine($"Temos {patio.QuantidadeVagasDisponiveis} vagas disponíveis");
 
             Console.ReadLine();
 
@@ -90,27 +121,24 @@ while (escolhaMenu != "0")
             Console.Clear();
             Console.WriteLine(" lista de veiculos");
 
-            foreach (string placa in placas)
+            foreach ( Carro car in carros)
             {
-                Console.WriteLine(placa); 
+                Console.WriteLine($"{car.Placa} - {car.NomeProp}"); 
             }
             Console.ReadLine();
             Console.Clear();
             break;
-
         case "8":
             Console.Clear();
-            Console.WriteLine("Pessoas cadastradas");
-            foreach (string pessoa in pessoas)
-            {
-                Console.WriteLine(pessoa);
-            }
 
+            foreach(Estacionado estacionado in patio.CarrosEstacionados )
+            {
+                Console.WriteLine($"O carro com a placa {estacionado.Carro.Placa} esta estacionado a {(int)DateTime.Now.Subtract(estacionado.HorarioEntrada).TotalMinutes} minutos e {(int)DateTime.Now.Subtract(estacionado.HorarioEntrada).Seconds} segundos!");
+            }
             Console.ReadLine();
             Console.Clear();
 
             break;
-
         case "0":
             Console.Clear();
             Console.WriteLine("Você tem certeza que quer fechar o programa? S para sim e N para não");
