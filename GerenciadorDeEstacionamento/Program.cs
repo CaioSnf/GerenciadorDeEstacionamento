@@ -1,9 +1,9 @@
-﻿string escolha = "";
+﻿string escolhaMenu = "";
 List<string> placas = new List<string>();
 List<string> pessoas = new List<string>();
 string fecharPrograma = "";
-
-while (escolha != "0") 
+int vagasDisponiveis = 60;
+while (escolhaMenu != "0") 
 {
     Console.WriteLine("Bem vindo ao estacionamento Ki Vaga");
     Console.WriteLine("1- Cadastro de placa de dono");
@@ -17,9 +17,9 @@ while (escolha != "0")
     Console.WriteLine("0- Fechar programa");
 
 
-    escolha = Console.ReadLine();
+    escolhaMenu = Console.ReadLine();
 
-    switch (escolha)
+    switch (escolhaMenu)
     {
         case "1":
             Console.Clear();
@@ -38,7 +38,25 @@ while (escolha != "0")
             break;
 
         case "2":
-            Console.WriteLine("Escolheu opção 2");
+            Console.Clear();
+
+            if (placas.Count != 0)
+            {
+                Console.WriteLine("Escolha qual placa que entrou no patio");
+                foreach (string placa in placas)
+                {
+
+                    Console.WriteLine(placa);
+
+                }
+                
+            }
+            else {
+                Console.WriteLine("Não existe nenhuma placa cadastrada");
+            
+            }
+            Console.ReadLine();
+
             Console.Clear();
             break;
 
@@ -48,7 +66,12 @@ while (escolha != "0")
             break;
 
         case "4":
-            Console.WriteLine("Escolheu opção 4");
+            Console.Clear();
+            
+            Console.WriteLine($"Temos {vagasDisponiveis} vagas disponíveis");
+
+            Console.ReadLine();
+
             Console.Clear();
             break;
 
@@ -93,7 +116,7 @@ while (escolha != "0")
             Console.WriteLine("Você tem certeza que quer fechar o programa? S para sim e N para não");
             fecharPrograma = Console.ReadLine();
             if (fecharPrograma == "N" || fecharPrograma == "n" ) {
-                escolha = "n";
+                escolhaMenu = "n";
 
             }
             Console.Clear();
