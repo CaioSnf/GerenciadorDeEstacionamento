@@ -6,11 +6,16 @@ using System.Threading.Tasks;
 
 namespace GerenciadorDeEstacionamento.Classes
 {
-    internal class Estacionado
+    internal class Vaga
     {
         public Carro Carro { get; set; } 
         public DateTime HorarioEntrada { get; set; }
         public string Id { get; set; }
 
+        public Vaga(Carro carro)
+        {
+            Carro = carro;
+            HorarioEntrada = DateTime.Now;
+        }
     }
 }

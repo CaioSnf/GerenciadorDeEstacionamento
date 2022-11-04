@@ -13,8 +13,12 @@ namespace GerenciadorDeEstacionamento.Classes
 
         public decimal TotalFaturado { get; set; }
 
-        public List<Estacionado> CarrosEstacionados { get; set; }
+        public List<Vaga> Vagas { get; set; }
 
+        public void ocuparVaga (Vaga vagaOcupada) {
+            Vagas.Add(vagaOcupada);
+            QuantidadeVagasDisponiveis -= 1;
+        }
     }
     
 }
