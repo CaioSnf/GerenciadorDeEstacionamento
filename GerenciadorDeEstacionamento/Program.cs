@@ -19,6 +19,18 @@ int somarMaisUm(int numero) {
     return numero + 1;
 }
 
+void mostrarCarros(bool estaEstacionado) 
+{
+    foreach (var carro in carros)
+    {
+        if (carro.EstaEstacionado == estaEstacionado) //o IF vai executar o que esta entre chaves se o que estiver entre parenteses for verdadeiro
+        {
+
+            Console.WriteLine($"Placa: {carro.Placa} - Proprietario: {carro.Proprietario}");
+        }
+
+    }
+}
 void cadastrarCarro() {
     Carro carro = new Carro();
 
@@ -33,7 +45,7 @@ void cadastrarCarro() {
 
     Console.WriteLine("Proprietario");
 
-    carro.NomeProp = Console.ReadLine();
+    carro.Proprietario = Console.ReadLine();
     carros.Add(carro);
     Console.Clear();
 }
@@ -41,22 +53,24 @@ void cadastrarCarro() {
 void estacionarCarro() {
     
     Console.Clear();
-
-    if (carros.Count != 0)
+    List<Carro> carrosDisponiveis = new List<Carro>();
+    carrosDisponiveis = carros.Where(carro => carro.EstaEstacionado == false).ToList();
+    if (carrosDisponiveis.Count != 0)
     {
         Console.WriteLine("Escolha qual placa que entrou no patio");
-        foreach (Carro car in carros)
-        {
-            Console.WriteLine(car.Placa);
-        }
+        mostrarCarros(false);
 
         placaEntradaPatio = Console.ReadLine();
         carroEscolhido = carros.FirstOrDefault(carro => carro.Placa == placaEntradaPatio);
-        if (carroEscolhido != null)
+        if (carroEscolhido != null && carroEscolhido.EstaEstacionado == false)
         {
+            carros.FirstOrDefault(carro => carro.Placa == placaEntradaPatio).EstaEstacionado = true;
             Vaga vagaOcupada = new Vaga(carroEscolhido);
             patio.ocuparVaga(vagaOcupada);
             Console.WriteLine($"O carro com placa {vagaOcupada.Carro.Placa} foi estacionado");
+        }
+        else if (carroEscolhido != null && carroEscolhido.EstaEstacionado == true) {
+            Console.WriteLine($"O carro {carroEscolhido.Placa} ja esta estacionado");
         }
         else
         {
@@ -65,7 +79,7 @@ void estacionarCarro() {
     }
     else
     {
-        Console.WriteLine("Não existe nenhuma placa cadastrada");
+        Console.WriteLine("Não existem carros disponiveis para estacionar");
 
     }
     Console.ReadLine();
@@ -80,7 +94,7 @@ void montarMenu() {
     Console.WriteLine("3- Saida do veículo do pátio");
     Console.WriteLine("4- Quantidade de vagas");
     Console.WriteLine("5- Total faturado no dia especificado");
-    Console.WriteLine("6- Tabela de preços");
+    Console.WriteLine("6- Mostrar veiculos estacionados");
     Console.WriteLine("7- Carros cadastrados");
     Console.WriteLine("8- Carros estacionados");
     Console.WriteLine("0- Fechar programa");
@@ -131,7 +145,9 @@ while (escolhaMenu != "0")
             break;
 
         case "6":
-            Console.WriteLine("Escolheu opção 6");
+            Console.Clear();
+            mostrarCarros(true);
+            Console.ReadLine();
             Console.Clear();
             break;
 
@@ -142,7 +158,7 @@ while (escolhaMenu != "0")
 
             foreach (Carro car in carros)
             {
-                Console.WriteLine($"{car.Placa} - {car.NomeProp}");
+                Console.WriteLine($"{car.Placa} - {car.Proprietario}");
             }
             Console.ReadLine();
             Console.Clear();

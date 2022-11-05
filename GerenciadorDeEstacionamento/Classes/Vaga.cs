@@ -12,7 +12,7 @@ namespace GerenciadorDeEstacionamento.Classes
         public DateTime HorarioEntrada { get; set; }
         public string Id { get; set; }
 
-        public Vaga(Carro carro)
+        public Vaga(Carro carro)// construtor da classe
         {
             Carro = carro;
             HorarioEntrada = DateTime.Now;
