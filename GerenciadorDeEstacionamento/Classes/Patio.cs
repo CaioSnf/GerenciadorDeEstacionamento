@@ -19,6 +19,22 @@ namespace GerenciadorDeEstacionamento.Classes
             Vagas.Add(vagaOcupada);
             QuantidadeVagasDisponiveis -= 1;
         }
+        public void desocuparVaga(Carro carro)
+        {
+            Vaga vagaOcupada = new Vaga(carro);
+            vagaOcupada = Vagas.FirstOrDefault(vaga => vaga.Carro == carro);
+            Vagas.Remove(vagaOcupada);
+            QuantidadeVagasDisponiveis += 1;
+        }
+        public void cobrar(Vaga vaga)
+        {
+            int minutos = (int)DateTime.Now.Subtract(vaga.HorarioEntrada).TotalMinutes;
+            
+           
+            
+        }
+
+
     }
     
 }

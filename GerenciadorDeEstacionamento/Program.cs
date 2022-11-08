@@ -4,7 +4,7 @@
 string escolhaMenu = "";
 string fecharPrograma = "";
 string placaEntradaPatio = "";
-
+string placaSaidaPatio = "";
 Patio patio = new Patio();
 patio.ValorHora = 4.50M;
 patio.QuantidadeVagasDisponiveis = 60;
@@ -15,11 +15,13 @@ Carro carroEscolhido = new Carro();
 
 
 // função== sempre é verbo
-int somarMaisUm(int numero) {
-    return numero + 1;
+List<Carro> recuperarCarros(bool carroEstacionado)
+{
+    return carros.Where(carro => carro.EstaEstacionado == carroEstacionado).ToList();//Return retorna o valor do tipo da função (ex string retorna um texto)
+
 }
 
-void mostrarCarros(bool estaEstacionado) 
+void mostrarCarros(bool estaEstacionado)
 {
     foreach (var carro in carros)
     {
@@ -31,7 +33,53 @@ void mostrarCarros(bool estaEstacionado)
 
     }
 }
-void cadastrarCarro() {
+void balizarCarro(bool entrada, List<Carro> listaDeCarros, string placa)
+{
+    carroEscolhido = carros.FirstOrDefault(carro => carro.Placa == placa);
+    if (entrada)
+    {
+        if (carroEscolhido != null && carroEscolhido.EstaEstacionado == false)
+        {
+            carros.FirstOrDefault(carro => carro.Placa == placa).EstaEstacionado = true;
+            Vaga vagaOcupada = new Vaga(carroEscolhido);
+            patio.ocuparVaga(vagaOcupada);
+            Console.WriteLine($"O carro com placa {vagaOcupada.Carro.Placa} foi estacionado");
+        }
+        else if (carroEscolhido != null && carroEscolhido.EstaEstacionado == true)
+        {
+            Console.WriteLine($"O carro {carroEscolhido.Placa} ja esta estacionado");
+        }
+        else
+        {
+            Console.WriteLine("O carro inserido nao existe");
+        }
+    }
+    else
+    {
+        if (carroEscolhido != null && carroEscolhido.EstaEstacionado == true) { 
+            carros.FirstOrDefault(carro => carro.Placa == placa).EstaEstacionado = false;
+            patio.desocuparVaga(carroEscolhido);
+            Console.WriteLine($"O carro com a placa {carroEscolhido.Placa} saiu do patio");
+        }
+    }
+
+}
+void retirarCarro()
+{
+    List<Carro> carrosEstacionados = recuperarCarros(true);
+
+    Console.Clear();
+
+    Console.WriteLine("Qual carro esta saindo do patio?");
+    mostrarCarros(true);
+
+    placaSaidaPatio = Console.ReadLine();
+    carroEscolhido = carros.FirstOrDefault(carro => carro.Placa == placaSaidaPatio);
+   
+
+}
+void cadastrarCarro()
+{
     Carro carro = new Carro();
 
     Console.Clear();
@@ -50,11 +98,11 @@ void cadastrarCarro() {
     Console.Clear();
 }
 
-void estacionarCarro() {
-    
+void estacionarCarro()
+{
+
     Console.Clear();
-    List<Carro> carrosDisponiveis = new List<Carro>();
-    carrosDisponiveis = carros.Where(carro => carro.EstaEstacionado == false).ToList();
+    List<Carro> carrosDisponiveis = recuperarCarros(false);
     if (carrosDisponiveis.Count != 0)
     {
         Console.WriteLine("Escolha qual placa que entrou no patio");
@@ -69,7 +117,8 @@ void estacionarCarro() {
             patio.ocuparVaga(vagaOcupada);
             Console.WriteLine($"O carro com placa {vagaOcupada.Carro.Placa} foi estacionado");
         }
-        else if (carroEscolhido != null && carroEscolhido.EstaEstacionado == true) {
+        else if (carroEscolhido != null && carroEscolhido.EstaEstacionado == true)
+        {
             Console.WriteLine($"O carro {carroEscolhido.Placa} ja esta estacionado");
         }
         else
@@ -87,7 +136,8 @@ void estacionarCarro() {
     Console.Clear();
 }
 
-void montarMenu() { 
+void montarMenu()
+{
     Console.WriteLine("Bem vindo ao estacionamento Ki Vaga");
     Console.WriteLine("1- Cadastro de placa de dono");
     Console.WriteLine("2- Entrada de veículo no pátio");
@@ -116,7 +166,7 @@ void mostrarQuantidadeDeVagasDisponiveis()
 //While mantem o programa aberto enquanto o usuario nao escolhe a opçao 0
 while (escolhaMenu != "0")
 {
-    montarMenu(); 
+    montarMenu();
 
     switch (escolhaMenu)
     {
@@ -166,7 +216,7 @@ while (escolhaMenu != "0")
         case "8":
             Console.Clear();
 
-            foreach (Vaga vaga in patio.Vagas)   
+            foreach (Vaga vaga in patio.Vagas)
             {
                 Console.WriteLine($"O carro com a placa {vaga.Carro.Placa} esta estacionado a {(int)DateTime.Now.Subtract(vaga.HorarioEntrada).TotalMinutes} minutos e {(int)DateTime.Now.Subtract(vaga.HorarioEntrada).Seconds} segundos!");
             }
