@@ -33,7 +33,7 @@ void mostrarCarros(bool estaEstacionado)
 
     }
 }
-void balizarCarro(bool entrada, List<Carro> listaDeCarros, string placa)
+void balizarCarro(bool entrada, string placa)
 {
     carroEscolhido = carros.FirstOrDefault(carro => carro.Placa == placa);
     if (entrada)
@@ -53,13 +53,24 @@ void balizarCarro(bool entrada, List<Carro> listaDeCarros, string placa)
         {
             Console.WriteLine("O carro inserido nao existe");
         }
+
     }
     else
     {
-        if (carroEscolhido != null && carroEscolhido.EstaEstacionado == true) { 
+        if (carroEscolhido != null && carroEscolhido.EstaEstacionado == true)
+        {
             carros.FirstOrDefault(carro => carro.Placa == placa).EstaEstacionado = false;
             patio.desocuparVaga(carroEscolhido);
             Console.WriteLine($"O carro com a placa {carroEscolhido.Placa} saiu do patio");
+        }
+        else if (carroEscolhido != null && carroEscolhido.EstaEstacionado == false)
+        {
+            Console.WriteLine($"O carro com a placa {carroEscolhido.Placa} não esta estacionado");
+        }
+
+        else 
+        {
+            Console.WriteLine("O carro inserido nao existe");
         }
     }
 
@@ -70,13 +81,17 @@ void retirarCarro()
 
     Console.Clear();
 
-    Console.WriteLine("Qual carro esta saindo do patio?");
-    mostrarCarros(true);
+    if (carrosEstacionados.Count != 0)
+    {
+        Console.WriteLine("Qual carro esta saindo do patio?");
+        mostrarCarros(true);
 
-    placaSaidaPatio = Console.ReadLine();
-    carroEscolhido = carros.FirstOrDefault(carro => carro.Placa == placaSaidaPatio);
-   
-
+        placaSaidaPatio = Console.ReadLine();
+        balizarCarro(false, placaSaidaPatio);
+    }
+    else { Console.WriteLine("Não existe carro para ser retirado"); }
+    Console.ReadLine();
+        Console.Clear();
 }
 void cadastrarCarro()
 {
@@ -109,22 +124,8 @@ void estacionarCarro()
         mostrarCarros(false);
 
         placaEntradaPatio = Console.ReadLine();
-        carroEscolhido = carros.FirstOrDefault(carro => carro.Placa == placaEntradaPatio);
-        if (carroEscolhido != null && carroEscolhido.EstaEstacionado == false)
-        {
-            carros.FirstOrDefault(carro => carro.Placa == placaEntradaPatio).EstaEstacionado = true;
-            Vaga vagaOcupada = new Vaga(carroEscolhido);
-            patio.ocuparVaga(vagaOcupada);
-            Console.WriteLine($"O carro com placa {vagaOcupada.Carro.Placa} foi estacionado");
-        }
-        else if (carroEscolhido != null && carroEscolhido.EstaEstacionado == true)
-        {
-            Console.WriteLine($"O carro {carroEscolhido.Placa} ja esta estacionado");
-        }
-        else
-        {
-            Console.WriteLine("O carro inserido nao existe");
-        }
+
+        balizarCarro(true, placaEntradaPatio);
     }
     else
     {
