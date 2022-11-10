@@ -20,6 +20,29 @@ List<Carro> recuperarCarros(bool carroEstacionado)
     return carros.Where(carro => carro.EstaEstacionado == carroEstacionado).ToList();//Return retorna o valor do tipo da função (ex string retorna um texto)
 
 }
+void obterTotalFaturado()
+{
+    Console.Clear();
+    Console.WriteLine($@"O valor total foi {patio.TotalFaturado}");
+    Console.ReadLine();
+    Console.Clear();
+
+}
+
+void mostrarCarrosEstacionadosTempo() 
+{
+    Console.Clear();
+
+    foreach (Vaga vaga in patio.Vagas)
+    {
+        Console.WriteLine($"O carro com a placa {vaga.Carro.Placa} esta estacionado a {(int)DateTime.Now.Subtract(vaga.HorarioEntrada).TotalMinutes} minutos e {(int)DateTime.Now.Subtract(vaga.HorarioEntrada).Seconds} segundos!");
+    }
+    Console.ReadLine();
+    Console.Clear();
+
+}
+
+
 
 void mostrarCarros(bool estaEstacionado)
 {
@@ -60,8 +83,9 @@ void balizarCarro(bool entrada, string placa)
         if (carroEscolhido != null && carroEscolhido.EstaEstacionado == true)
         {
             carros.FirstOrDefault(carro => carro.Placa == placa).EstaEstacionado = false;
+            decimal tarifa = patio.cobrar(carroEscolhido);
             patio.desocuparVaga(carroEscolhido);
-            Console.WriteLine($"O carro com a placa {carroEscolhido.Placa} saiu do patio");
+            Console.WriteLine($"O carro com a placa {carroEscolhido.Placa} saiu do patio e foi cobrado a tarifa de R$ {tarifa}");
         }
         else if (carroEscolhido != null && carroEscolhido.EstaEstacionado == false)
         {
@@ -143,8 +167,8 @@ void montarMenu()
     Console.WriteLine("1- Cadastro de placa de dono");
     Console.WriteLine("2- Entrada de veículo no pátio");
     Console.WriteLine("3- Saida do veículo do pátio");
-    Console.WriteLine("4- Quantidade de vagas");
-    Console.WriteLine("5- Total faturado no dia especificado");
+    Console.WriteLine("4- Quantidade de vagas disponievis");
+    Console.WriteLine("5- Total faturado");
     Console.WriteLine("6- Mostrar veiculos estacionados");
     Console.WriteLine("7- Carros cadastrados");
     Console.WriteLine("8- Carros estacionados");
@@ -182,8 +206,8 @@ while (escolhaMenu != "0")
             break;
 
         case "3":
-            Console.WriteLine("Escolheu opção 3");
-            Console.Clear();
+            retirarCarro();
+
             break;
 
         case "4":
@@ -191,8 +215,8 @@ while (escolhaMenu != "0")
             break;
 
         case "5":
-            Console.WriteLine("Escolheu opção 5");
-            Console.Clear();
+
+            obterTotalFaturado();
             break;
 
         case "6":
@@ -203,27 +227,16 @@ while (escolhaMenu != "0")
             break;
 
         case "7":
-
+            
             Console.Clear();
             Console.WriteLine(" lista de veiculos");
-
-            foreach (Carro car in carros)
-            {
-                Console.WriteLine($"{car.Placa} - {car.Proprietario}");
-            }
+            mostrarCarros(false);
             Console.ReadLine();
             Console.Clear();
             break;
         case "8":
-            Console.Clear();
 
-            foreach (Vaga vaga in patio.Vagas)
-            {
-                Console.WriteLine($"O carro com a placa {vaga.Carro.Placa} esta estacionado a {(int)DateTime.Now.Subtract(vaga.HorarioEntrada).TotalMinutes} minutos e {(int)DateTime.Now.Subtract(vaga.HorarioEntrada).Seconds} segundos!");
-            }
-            Console.ReadLine();
-            Console.Clear();
-
+            mostrarCarrosEstacionadosTempo();
             break;
         case "0":
             Console.Clear();
