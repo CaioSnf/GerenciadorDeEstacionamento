@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +9,8 @@ namespace GerenciadorDeEstacionamento.Classes
 {
     internal class Patio
     {
+        [Key]
+        public int Id { get; set; }
         public decimal ValorDiaria { get; set; }
 
         public int QuantidadeVagasDisponiveis { get; set; }
@@ -58,7 +61,8 @@ namespace GerenciadorDeEstacionamento.Classes
         }
         public void desocuparVaga(Carro carro)
         {
-            Vaga vagaOcupada = new Vaga(carro);
+            Vaga vagaOcupada = new Vaga();
+            vagaOcupada.Carro = carro;
             vagaOcupada = Vagas.FirstOrDefault(vaga => vaga.Carro == carro);
             Vagas.Remove(vagaOcupada);
             QuantidadeVagasDisponiveis += 1;
@@ -66,7 +70,8 @@ namespace GerenciadorDeEstacionamento.Classes
         public decimal cobrar(Carro carro)// void não pode ter return.
         {
             
-            Vaga vaga = new Vaga(carro);
+            Vaga vaga = new Vaga();
+            vaga.Carro = carro; 
             vaga = Vagas.FirstOrDefault(vaga => vaga.Carro == carro);
 
             int minutos = (int)DateTime.Now.Subtract(vaga.HorarioEntrada).TotalMinutes;

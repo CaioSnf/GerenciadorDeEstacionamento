@@ -1,4 +1,5 @@
 ﻿using GerenciadorDeEstacionamento.Classes;
+using GerenciadorDeEstacionamento.Data;
 
 //variaveis - tipo nome = valor inicial
 string escolhaMenu = "";
@@ -12,6 +13,8 @@ patio.Vagas = new List<Vaga>();
 
 List<Carro> carros = new List<Carro>();
 Carro carroEscolhido = new Carro();
+
+AppDbContext db = new AppDbContext();
 
 
 // função== sempre é verbo
@@ -64,7 +67,8 @@ void balizarCarro(bool entrada, string placa)
         if (carroEscolhido != null && carroEscolhido.EstaEstacionado == false)
         {
             carros.FirstOrDefault(carro => carro.Placa == placa).EstaEstacionado = true;
-            Vaga vagaOcupada = new Vaga(carroEscolhido);
+            Vaga vagaOcupada = new Vaga();
+            vagaOcupada.Carro = carroEscolhido;
             patio.ocuparVaga(vagaOcupada);
             Console.WriteLine($"O carro com placa {vagaOcupada.Carro.Placa} foi estacionado");
         }
