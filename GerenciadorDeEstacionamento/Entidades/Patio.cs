@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Identity.Client;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -14,21 +15,21 @@ namespace GerenciadorDeEstacionamento.Classes
         public decimal ValorDiaria { get; set; }
 
         public int QuantidadeVagasDisponiveis { get; set; }
-        public decimal ValorHora { get; set; }  
+        public decimal ValorHora { get; set; }
 
         public decimal TotalFaturado { get; set; }
 
-        public List<Vaga> Vagas { get; set; }
+
 
 
         public Patio()
         {
-            ValorDiaria = 20M;
+
 
         }
 
-        public decimal calcularTarifa (int minutos) 
-        { 
+        public decimal calcularTarifa(int minutos)
+        {
             decimal tarifa = 0;
 
             if (minutos <= 60 && minutos > 0) //1h
@@ -55,25 +56,11 @@ namespace GerenciadorDeEstacionamento.Classes
 
         }
 
-        public void ocuparVaga (Vaga vagaOcupada) {
-            Vagas.Add(vagaOcupada);
-            QuantidadeVagasDisponiveis -= 1;
-        }
-        public void desocuparVaga(Carro carro)
-        {
-            Vaga vagaOcupada = new Vaga();
-            vagaOcupada.Carro = carro;
-            vagaOcupada = Vagas.FirstOrDefault(vaga => vaga.Carro == carro);
-            Vagas.Remove(vagaOcupada);
-            QuantidadeVagasDisponiveis += 1;
-        }
-        public decimal cobrar(Carro carro)// void não pode ter return.
-        {
-            
-            Vaga vaga = new Vaga();
-            vaga.Carro = carro; 
-            vaga = Vagas.FirstOrDefault(vaga => vaga.Carro == carro);
 
+
+
+        public decimal cobrar(Vaga vaga)// void não pode ter return.
+        {
             int minutos = (int)DateTime.Now.Subtract(vaga.HorarioEntrada).TotalMinutes;
             decimal tarifa = calcularTarifa(minutos);
             TotalFaturado += tarifa;
@@ -82,5 +69,5 @@ namespace GerenciadorDeEstacionamento.Classes
 
 
     }
-    
+
 }

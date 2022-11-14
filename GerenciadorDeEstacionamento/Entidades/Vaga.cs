@@ -13,6 +13,7 @@ namespace GerenciadorDeEstacionamento.Classes
         public int Id { get; set; }
         public Carro Carro { get; set; } 
         public DateTime HorarioEntrada { get; set; }
+        public Patio Patio { get; set; }
 
         public Vaga()// construtor da classe
         {
