@@ -1,5 +1,6 @@
 ﻿using GerenciadorDeEstacionamento.Classes;
 using GerenciadorDeEstacionamento.Data;
+using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
 
 AppDbContext db = new AppDbContext();//contexto do banco
@@ -11,25 +12,64 @@ string placaEntradaPatio = "";
 string placaSaidaPatio = "";
 
 // função== sempre é verbo
-List<Carro> recuperarCarros()
+async Task<List<Carro>> recuperarCarros()
 {
    
-    return db.Carros.ToList();//Return retorna o valor do tipo da função (ex string retorna um texto)
+    return await db.Carros.ToListAsync();//Return retorna o valor do tipo da função (ex string retorna um texto)
 
 }
-Patio recuperarPatio(int idPatio) 
+async Task<Patio> recuperarPatio(int idPatio) 
 {
-    return db.Patios.ToList().FirstOrDefault(patio => patio.Id == idPatio);
+    var patioDb = await db.Patios.ToListAsync();
+    return patioDb.FirstOrDefault(patio => patio.Id == idPatio);
 }
-List<Vaga> recuperarVagasPorPatio(int idPatio) 
+async Task<List<Vaga>> recuperarVagasPorPatio(int idPatio) 
 {
-    return db.Vagas.ToList().Where(vaga => vaga.Patio.Id == idPatio).ToList();
+    var vagasDb = await db.Vagas.ToListAsync();
+    return vagasDb.Where(vaga => vaga.Patio.Id == idPatio).ToList();
 }
+async Task<List<Vaga>> recuperarVagas() 
+{
+    return await db.Vagas.Include(vaga => vaga.Patio).ToListAsync();
+}
+async Task mostrarPatios()
+{
+    List<Patio> listaDePatio = await recuperarPatios();
+    if (listaDePatio == null) 
+    {
+        Console.WriteLine("Não existe nenhum patio cadastrado");
+        return;
+    }
+    foreach (Patio p in listaDePatio) 
+    {
+        Console.WriteLine($"Id: {p.Id}, Nome: { p.Nome}");
+       
+    }
+        
+    
+}
+async Task<List<Patio>> recuperarPatios()
+{  
+   return await db.Patios.ToListAsync();
+}
+
 void cadastrarPatio() 
 {
     Patio patio = new Patio();
     Console.Clear();
     Console.WriteLine("CADASTRO DE PATIO");
+    Console.WriteLine("Qual o nome do Patio?");
+    string nomePatio = Console.ReadLine();
+    if(nomePatio == "") 
+    {
+        Console.WriteLine("O nome informado é vazio");
+        Console.ReadLine();
+        Console.Clear();
+        return;
+
+    }
+    patio.Nome = nomePatio;
+    
     Console.WriteLine("Qual valor da Hora?");
     string valorHora = Console.ReadLine();
     decimal valorHoraConvertido = 0;
@@ -72,11 +112,13 @@ void cadastrarPatio()
     }
     
     db.Patios.Add(patio);
-    db.SaveChanges();   
+    db.SaveChanges();
+    Console.Clear();
+
 
 
 }
-void obterTotalFaturado()
+async Task obterTotalFaturado()
 {
     Console.Clear();
     Console.WriteLine("Qual Id do patio que deseja consultar?");
@@ -84,7 +126,7 @@ void obterTotalFaturado()
     int idPatioInt = 0;
     if (int.TryParse(idPatio, out idPatioInt))
     {
-        Patio patio = recuperarPatio(idPatioInt);
+        Patio patio = await recuperarPatio(idPatioInt);
         if (patio == null)
         {
             Console.WriteLine($"O Id do patio fornecido é invalido");
@@ -94,7 +136,7 @@ void obterTotalFaturado()
         else
         {
 
-            Console.WriteLine($@"O valor total foi {patio.TotalFaturado}");
+            Console.WriteLine($@"O valor total foi R$ {patio.TotalFaturado}");
             Console.ReadLine();
             Console.Clear();
 
@@ -138,15 +180,15 @@ void mostrarCadastros ()
 
     }
 }
-void mostrarCarrosEstacionadosTempo() 
+async Task mostrarCarrosEstacionadosTempo() 
 {   Console.Clear();
     Console.WriteLine("Qual Id do patio que esta saindo o carro?");
     string idPatio = Console.ReadLine();
     int idPatioInt = 0;
     if (int.TryParse(idPatio, out idPatioInt))
     {
-        Patio patio = recuperarPatio(idPatioInt);
-        List<Vaga> vagas = recuperarVagasPorPatio(idPatioInt);
+        Patio patio = await recuperarPatio(idPatioInt);
+        List<Vaga> vagas = await recuperarVagasPorPatio(idPatioInt);
         if (vagas == null)
         {
             Console.WriteLine("Não existem vagas nesse patio");
@@ -173,30 +215,50 @@ void mostrarCarrosEstacionadosTempo()
     }
    
 }
-void mostrarCarros(bool estaEstacionado)  
+async Task mostrarCarros(bool estaEstacionado)  
 {
-    List<Carro> carrosDb = recuperarCarros();    
-    if (carrosDb == null)
+    if (estaEstacionado)
     {
-        Console.WriteLine("Não existem carros cadastrados");
-        Console.ReadLine();
-        return;
-    }
-
-    foreach (var carro in carrosDb)
-    {
-        if (carro.EstaEstacionado == estaEstacionado) //o IF vai executar o que esta entre chaves se o que estiver entre parenteses for verdadeiro
+        List<Vaga> vagasDb = await recuperarVagas();
+        if (vagasDb == null)
         {
+            Console.WriteLine("Não existem carros estacionados");
+            return;
+        }
+        foreach (var vaga in vagasDb)
+        {
+            if (vaga.Carro.EstaEstacionado == estaEstacionado) //o IF vai executar o que esta entre chaves se o que estiver entre parenteses for verdadeiro
+            {
 
+                Console.WriteLine($"Placa: {vaga.Carro.Placa} - Proprietario: {vaga.Carro.Proprietario} - Patio: {vaga.Patio.Nome}");
+            }
+
+        }
+    }
+    else 
+    {
+        List<Carro> carrosDb = await recuperarCarros();
+        if (carrosDb == null)
+        {
+            Console.WriteLine("Não existem carros cadastrados");
+            Console.ReadLine();
+            return;
+        }
+        foreach (var carro in carrosDb)
+        {
             Console.WriteLine($"Placa: {carro.Placa} - Proprietario: {carro.Proprietario}");
         }
-
     }
+    
+    
+
+    
 }
-void balizarCarro(bool entrada, string placa, int idPatio)
+async Task balizarCarro(bool entrada, string placa, int idPatio)
 {
-    Carro carroEscolhido = recuperarCarros().FirstOrDefault(carro => carro.Placa == placa);
-    Patio patio = recuperarPatio(idPatio);
+    List<Carro> carrosDb = await recuperarCarros();
+    Carro carroEscolhido = carrosDb.FirstOrDefault(carro => carro.Placa == placa);
+    Patio patio = await recuperarPatio(idPatio);
     if (entrada)
     {
         if (carroEscolhido != null && carroEscolhido.EstaEstacionado == false)
@@ -228,7 +290,7 @@ void balizarCarro(bool entrada, string placa, int idPatio)
         {
             carroEscolhido.EstaEstacionado = false;
             db.Carros.Update(carroEscolhido);
-            List<Vaga> vagas = recuperarVagasPorPatio(idPatio);
+            List<Vaga> vagas = await recuperarVagasPorPatio(idPatio);
             Vaga vaga = vagas.FirstOrDefault(vaga => vaga.Carro == carroEscolhido); 
             decimal tarifa = patio.cobrar(vaga);
             db.Vagas.Remove(vaga);
@@ -250,9 +312,10 @@ void balizarCarro(bool entrada, string placa, int idPatio)
     }
 
 }
-void retirarCarro()
+async Task retirarCarro()
 {
-    List<Carro> carrosEstacionados = recuperarCarros().Where(carro => carro.EstaEstacionado == true).ToList();  
+    List<Carro> carrosEstacionados = await recuperarCarros();
+    carrosEstacionados = carrosEstacionados.Where(carro => carro.EstaEstacionado == true).ToList();  
 
     Console.Clear();
 
@@ -263,7 +326,7 @@ void retirarCarro()
         int idPatioInt = 0;
         if (int.TryParse(idPatio, out idPatioInt)) 
         {
-            Patio patio = recuperarPatio(idPatioInt);
+            Patio patio = await recuperarPatio(idPatioInt);
         }
         else
         {
@@ -315,19 +378,20 @@ void cadastrarCarro()
     Console.Clear();
 }
 
-void estacionarCarro()
+async Task estacionarCarro()
 {
 
     Console.Clear();
-    List<Carro> carrosDisponiveis = recuperarCarros().Where(carro => carro.EstaEstacionado == false).ToList();
+    List<Carro> carrosDisponiveis = await recuperarCarros();
+        carrosDisponiveis.Where(carro => carro.EstaEstacionado == false).ToList();
     if (carrosDisponiveis.Count != 0)
     {
-        Console.WriteLine("Qual Id do patio que esta saindo o carro?");
+        Console.WriteLine("Qual Id do patio que esta entrando o carro?");
         string idPatio = Console.ReadLine();
         int idPatioInt = 0;
         if (int.TryParse(idPatio, out idPatioInt))
         {
-            Patio patio = recuperarPatio(idPatioInt);
+            Patio patio = await recuperarPatio(idPatioInt);
         }
         else
         {
@@ -364,13 +428,14 @@ void montarMenu()
     Console.WriteLine("6- Mostrar veiculos estacionados");
     Console.WriteLine("7- Carros cadastrados");
     Console.WriteLine("8- Carros estacionados");
+    Console.WriteLine("9- Lista de Patios");
     Console.WriteLine("0- Fechar programa");
 
 
     escolhaMenu = Console.ReadLine();
 }
 
-void mostrarQuantidadeDeVagasDisponiveis()
+async Task mostrarQuantidadeDeVagasDisponiveis()
 {
     Console.Clear();
     Console.WriteLine("Qual Id do patio que deseja consultar?");
@@ -378,7 +443,7 @@ void mostrarQuantidadeDeVagasDisponiveis()
     int idPatioInt = 0;
     if (int.TryParse(idPatio, out idPatioInt))
     {
-        Patio patio = recuperarPatio(idPatioInt);
+        Patio patio = await recuperarPatio(idPatioInt);
         Console.WriteLine($"Temos {patio.QuantidadeVagasDisponiveis} vagas disponíveis");
     }
     else
@@ -393,73 +458,86 @@ void mostrarQuantidadeDeVagasDisponiveis()
     Console.Clear();
 }
 //While mantem o programa aberto enquanto o usuario nao escolhe a opçao 0
-while (escolhaMenu != "0")
+async void menu() 
 {
-    montarMenu();
-
-    switch (escolhaMenu)
+    while (escolhaMenu != "0")
     {
-        case "1":
-            mostrarCadastros();
+        montarMenu();
 
-            break;
+        switch (escolhaMenu)
+        {
+            case "1":
+                mostrarCadastros();
 
-        case "2":
-            estacionarCarro();
+                break;
 
-            break;
+            case "2":
+                estacionarCarro();
 
-        case "3":
-            retirarCarro();
+                break;
 
-            break;
+            case "3":
+                retirarCarro();
 
-        case "4":
-            mostrarQuantidadeDeVagasDisponiveis();
-            break;
+                break;
 
-        case "5":
+            case "4":
+                await mostrarQuantidadeDeVagasDisponiveis();
+                break;
 
-            obterTotalFaturado();
-            break;
+            case "5":
 
-        case "6":
-            Console.Clear();
-            mostrarCarros(true);
-            Console.ReadLine();
-            Console.Clear();
-            break;
+                obterTotalFaturado();
+                break;
 
-        case "7":
-            
-            Console.Clear();
-            Console.WriteLine(" lista de veiculos");
-            mostrarCarros(false);
-            Console.ReadLine();
-            Console.Clear();
-            break;
-        case "8":
+            case "6":
+                Console.Clear();
+                mostrarCarros(true);
+                Console.ReadLine();
+                Console.Clear();
+                break;
 
-            mostrarCarrosEstacionadosTempo();
-            break;
-        
-        case "0":
-            Console.Clear();
-            Console.WriteLine("Você tem certeza que quer fechar o programa? S para sim e N para não");
-            fecharPrograma = Console.ReadLine();
-            if (fecharPrograma == "N" || fecharPrograma == "n")
-            {
-                escolhaMenu = "n";
+            case "7":
 
-            }
-            Console.Clear();
-            break;
+                Console.Clear();
+                Console.WriteLine(" lista de veiculos");
+                mostrarCarros(false);
+                Console.ReadLine();
+                Console.Clear();
+                break;
+            case "8":
 
-        default:
-            Console.WriteLine("Escolheu a opção errada,volta otario");
+                mostrarCarrosEstacionadosTempo();
+                break;
 
-            break;
-            
+            case "9":
+                Console.Clear();
+                Console.WriteLine("Lista de Patios cadastrados");
+                mostrarPatios();
+                Console.ReadLine();
+                Console.Clear();
+                break;
 
+
+            case "0":
+                Console.Clear();
+                Console.WriteLine("Você tem certeza que quer fechar o programa? S para sim e N para não");
+                fecharPrograma = Console.ReadLine();
+                if (fecharPrograma == "N" || fecharPrograma == "n")
+                {
+                    escolhaMenu = "n";
+
+                }
+                Console.Clear();
+                break;
+
+            default:
+                Console.WriteLine("Escolheu a opção errada,volta otario");
+
+                break;
+
+
+        }
     }
 }
+menu();
